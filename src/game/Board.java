@@ -1,6 +1,9 @@
 //Jack Tinik 4/20/26
 package game;
 
+// Represents the game board for Tic Tac Toe
+//tracks the state of the board and allows players to make moves
+
 public class Board {
     private char[][] board; // 3x3 board
 

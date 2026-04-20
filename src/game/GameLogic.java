@@ -1,6 +1,8 @@
 //Jack Tinik 4/20/26
 package game;
 
+//simple class to check for wins and draws in the game of tic tac toe
+
 public class GameLogic {
 
     public static boolean checkWin(char[][] b, char s) {
