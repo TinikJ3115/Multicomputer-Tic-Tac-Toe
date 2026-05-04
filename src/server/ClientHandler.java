@@ -1,50 +1,96 @@
-//Jack Tinik 4/20/26
-// Handles communication with a single client in the Tic Tac Toe server application
 package server;
 
-import java.io.*;
+import shared.Message;
+import shared.Protocol;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
 
-// Each ClientHandler runs in its own thread to manage communication with a connected client
 public class ClientHandler implements Runnable {
+    private final Socket socket;
+    private final BufferedReader in;
+    private final PrintWriter out;
+    private final char symbol;
+    private final GameServer server;
+    private String playerName;
 
-    private Socket socket; // Socket for communicating with the client
-    private BufferedReader in; // Reader for receiving messages from the client
-    private PrintWriter out; // Writer for sending messages to the client
-    private char symbol; // The symbol (X or O) assigned to this client
-
-    //Initializes the ClientHandler with the client's socket and assigned symbol
-    public ClientHandler(Socket socket, char symbol) {
+    public ClientHandler(Socket socket, char symbol, GameServer server) throws IOException {
         this.socket = socket;
         this.symbol = symbol;
-
-        // Set up input and output streams for communication with the client
-        try {
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            out = new PrintWriter(socket.getOutputStream(), true);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.server = server;
+        this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        this.out = new PrintWriter(socket.getOutputStream(), true);
     }
 
-    // Sends a message to the client
     public void sendMessage(String msg) {
         out.println(msg);
     }
 
-    // The main loop for handling client communication, runs in a separate thread
+    public void sendMessage(Message message) {
+        sendMessage(message.serialize());
+    }
+
+    public char getSymbol() {
+        return symbol;
+    }
+
+    public String getPlayerName() {
+        return playerName;
+    }
+
     @Override
     public void run() {
-        sendMessage("WELCOME " + symbol);
-        System.out.println("Player " + symbol + " handler started"); // Log when a new client handler is started
+        sendMessage(Message.of(Protocol.WELCOME, String.valueOf(symbol)));
+        sendMessage(Message.of(Protocol.INFO, "Connected to the Tic Tac Toe server."));
 
         try {
-            String input; // Read messages from the client until the connection is closed
+            String input;
             while ((input = in.readLine()) != null) {
-                System.out.println("Received from " + symbol + ": " + input);// Log received messages for debugging purposes
+                handleMessage(Message.parse(input));
             }
         } catch (IOException e) {
-            System.out.println("Player " + symbol + " disconnected.");// Log when a client disconnects
+            System.out.println("Player " + symbol + " disconnected.");
+        } finally {
+            close();
+            server.handleDisconnect(this);
+        }
+    }
+
+    private void handleMessage(Message message) {
+        switch (message.getType()) {
+            case Protocol.HELLO:
+                playerName = message.getPartCount() > 0 ? message.getPart(0) : ("Player " + symbol);
+                server.registerPlayer(this, playerName);
+                break;
+            case Protocol.MOVE:
+                if (message.getPartCount() < 2) {
+                    sendMessage(Message.of(Protocol.ERROR, "Move message was missing coordinates."));
+                    return;
+                }
+                int row = Integer.parseInt(message.getPart(0));
+                int col = Integer.parseInt(message.getPart(1));
+                server.handleMove(this, row, col);
+                break;
+            case Protocol.REMATCH:
+                server.handleRematchRequest(this);
+                break;
+            case Protocol.DISCONNECT:
+                close();
+                server.handleDisconnect(this);
+                break;
+            default:
+                sendMessage(Message.of(Protocol.ERROR, "Unknown message type: " + message.getType()));
+                break;
+        }
+    }
+
+    public synchronized void close() {
+        try {
+            socket.close();
+        } catch (IOException ignored) {
         }
     }
 }

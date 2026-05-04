@@ -48,12 +48,21 @@ public class GameState {
     }
 
     public boolean applyMove(int row, int col) {
+        return applyMove(row, col, currentPlayer);
+    }
+
+    public boolean applyMove(int row, int col, char playerSymbol) {
         if (phase != Phase.IN_PROGRESS) {
             statusMessage = "Start a game before making a move.";
             return false;
         }
 
-        if (!board.makeMove(row, col, currentPlayer)) {
+        if (playerSymbol != currentPlayer) {
+            statusMessage = "It is not " + playerSymbol + "'s turn.";
+            return false;
+        }
+
+        if (!board.makeMove(row, col, playerSymbol)) {
             statusMessage = "That square is already taken.";
             return false;
         }
@@ -148,5 +157,23 @@ public class GameState {
             default:
                 return "The game is still in progress.";
         }
+    }
+
+    public void syncState(
+        char[][] boardSnapshot,
+        char currentPlayer,
+        Phase phase,
+        Outcome outcome,
+        String statusMessage,
+        String playerXName,
+        String playerOName
+    ) {
+        board.loadBoard(boardSnapshot);
+        this.currentPlayer = currentPlayer;
+        this.phase = phase;
+        this.outcome = outcome;
+        this.statusMessage = statusMessage;
+        this.playerXName = normalizeName(playerXName, "Player X");
+        this.playerOName = normalizeName(playerOName, "Player O");
     }
 }

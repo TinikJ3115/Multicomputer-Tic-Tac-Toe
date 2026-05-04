@@ -48,6 +48,28 @@ public class Board {
         return board[row][col];
     }
 
+    public void setCell(int row, int col, char value) {
+        if (!isInBounds(row, col)) {
+            throw new IllegalArgumentException("Cell is out of bounds");
+        }
+        board[row][col] = value;
+    }
+
+    public void loadBoard(char[][] source) {
+        if (source == null || source.length != SIZE) {
+            throw new IllegalArgumentException("Board snapshot must be 3x3.");
+        }
+
+        for (int row = 0; row < SIZE; row++) {
+            if (source[row] == null || source[row].length != SIZE) {
+                throw new IllegalArgumentException("Board snapshot must be 3x3.");
+            }
+            for (int col = 0; col < SIZE; col++) {
+                board[row][col] = source[row][col];
+            }
+        }
+    }
+
     // Returns a defensive copy so UI/network code cannot mutate the board directly.
     public char[][] getBoard() {
         char[][] copy = new char[SIZE][SIZE];
