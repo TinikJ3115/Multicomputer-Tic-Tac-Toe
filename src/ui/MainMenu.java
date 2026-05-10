@@ -6,14 +6,19 @@ import server.ServerMain;
 import shared.Constants;
 
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Collections;
 
+import javax.swing.BoxLayout;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -34,24 +39,27 @@ public class MainMenu extends JFrame {
         super("Multicomputer Tic Tac Toe");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(12, 12));
-        setSize(460, 360);
+        setMinimumSize(new Dimension(560, 430));
+        setSize(560, 430);
         setLocationByPlatform(true);
 
         JLabel title = new JLabel("Start a Tic Tac Toe Match", SwingConstants.CENTER);
         add(title, BorderLayout.NORTH);
 
-        JPanel content = new JPanel(new GridLayout(2, 1, 12, 12));
+        JPanel content = new JPanel();
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
         content.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
         JPanel localPanel = new JPanel(new BorderLayout(8, 8));
         localPanel.setBorder(BorderFactory.createTitledBorder("Local Demo"));
-        JPanel localForm = new JPanel(new GridLayout(2, 2, 8, 8));
-        localForm.add(new JLabel("Player X Name:"));
         playerXField = new JTextField("Player X");
-        localForm.add(playerXField);
-        localForm.add(new JLabel("Player O Name:"));
+        playerXField.setColumns(18);
         playerOField = new JTextField("Player O");
-        localForm.add(playerOField);
+        playerOField.setColumns(18);
+        JPanel localForm = createFormPanel(
+            new String[] {"Player X Name:", "Player O Name:"},
+            new JComponent[] {playerXField, playerOField}
+        );
         localPanel.add(localForm, BorderLayout.CENTER);
 
         JButton startLocalButton = new JButton("Start Local Demo");
@@ -60,33 +68,67 @@ public class MainMenu extends JFrame {
 
         JPanel networkPanel = new JPanel(new BorderLayout(8, 8));
         networkPanel.setBorder(BorderFactory.createTitledBorder("Network Game"));
-        JPanel networkForm = new JPanel(new GridLayout(3, 2, 8, 8));
-        networkForm.add(new JLabel("Your Name:"));
         networkNameField = new JTextField("Player");
-        networkForm.add(networkNameField);
-        networkForm.add(new JLabel("Server Host:"));
+        networkNameField.setColumns(18);
         hostField = new JTextField(Constants.DEFAULT_HOST);
-        networkForm.add(hostField);
-        networkForm.add(new JLabel("Port:"));
+        hostField.setColumns(18);
         portField = new JTextField(String.valueOf(Constants.DEFAULT_PORT));
-        networkForm.add(portField);
+        portField.setColumns(18);
+        JPanel networkForm = createFormPanel(
+            new String[] {"Your Name:", "Server Host:", "Port:"},
+            new JComponent[] {networkNameField, hostField, portField}
+        );
         networkPanel.add(networkForm, BorderLayout.CENTER);
 
         hostIpLabel = new JLabel("Host LAN IP: " + detectLanIp(), SwingConstants.LEFT);
+        hostIpLabel.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 4));
         networkPanel.add(hostIpLabel, BorderLayout.NORTH);
 
-        JPanel networkActions = new JPanel(new GridLayout(1, 2, 8, 8));
+        JPanel networkActions = new JPanel(new GridBagLayout());
+        GridBagConstraints actionConstraints = new GridBagConstraints();
+        actionConstraints.insets = new Insets(0, 4, 0, 4);
+        actionConstraints.fill = GridBagConstraints.HORIZONTAL;
+        actionConstraints.weightx = 1.0;
         JButton hostButton = new JButton("Host and Join");
         hostButton.addActionListener(e -> hostAndJoinGame());
         JButton joinButton = new JButton("Join Server");
         joinButton.addActionListener(e -> joinNetworkGame(false));
-        networkActions.add(hostButton);
-        networkActions.add(joinButton);
+        actionConstraints.gridx = 0;
+        networkActions.add(hostButton, actionConstraints);
+        actionConstraints.gridx = 1;
+        networkActions.add(joinButton, actionConstraints);
         networkPanel.add(networkActions, BorderLayout.SOUTH);
 
+        localPanel.setAlignmentX(LEFT_ALIGNMENT);
+        networkPanel.setAlignmentX(LEFT_ALIGNMENT);
+        localPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 150));
+        networkPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 220));
         content.add(localPanel);
+        content.add(javax.swing.Box.createVerticalStrut(12));
         content.add(networkPanel);
         add(content, BorderLayout.CENTER);
+    }
+
+    private JPanel createFormPanel(String[] labels, JComponent[] fields) {
+        JPanel form = new JPanel(new GridBagLayout());
+        form.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.insets = new Insets(6, 6, 6, 6);
+        constraints.anchor = GridBagConstraints.WEST;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+
+        for (int i = 0; i < labels.length; i++) {
+            constraints.gridx = 0;
+            constraints.gridy = i;
+            constraints.weightx = 0;
+            form.add(new JLabel(labels[i]), constraints);
+
+            constraints.gridx = 1;
+            constraints.weightx = 1.0;
+            form.add(fields[i], constraints);
+        }
+
+        return form;
     }
 
     private void launchLocalGame() {
