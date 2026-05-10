@@ -7,6 +7,10 @@ import shared.Constants;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.Collections;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -24,6 +28,7 @@ public class MainMenu extends JFrame {
     private final JTextField networkNameField;
     private final JTextField hostField;
     private final JTextField portField;
+    private final JLabel hostIpLabel;
 
     public MainMenu() {
         super("Multicomputer Tic Tac Toe");
@@ -66,6 +71,9 @@ public class MainMenu extends JFrame {
         portField = new JTextField(String.valueOf(Constants.DEFAULT_PORT));
         networkForm.add(portField);
         networkPanel.add(networkForm, BorderLayout.CENTER);
+
+        hostIpLabel = new JLabel("Host LAN IP: " + detectLanIp(), SwingConstants.LEFT);
+        networkPanel.add(hostIpLabel, BorderLayout.NORTH);
 
         JPanel networkActions = new JPanel(new GridLayout(1, 2, 8, 8));
         JButton hostButton = new JButton("Host and Join");
@@ -131,6 +139,13 @@ public class MainMenu extends JFrame {
         }
 
         hostField.setText(Constants.DEFAULT_HOST);
+        hostIpLabel.setText("Host LAN IP: " + detectLanIp());
+        JOptionPane.showMessageDialog(
+            this,
+            "Server started.\n\nOn the other computer, use this host address:\n" + detectLanIp() + "\nPort: " + port,
+            "Host Information",
+            JOptionPane.INFORMATION_MESSAGE
+        );
         joinNetworkGame(true);
     }
 
@@ -260,6 +275,24 @@ public class MainMenu extends JFrame {
             ResultPopup.showError(this, "Please enter a valid port number.");
             return -1;
         }
+    }
+
+    private String detectLanIp() {
+        try {
+            for (NetworkInterface networkInterface : Collections.list(NetworkInterface.getNetworkInterfaces())) {
+                if (!networkInterface.isUp() || networkInterface.isLoopback() || networkInterface.isVirtual()) {
+                    continue;
+                }
+
+                for (InetAddress address : Collections.list(networkInterface.getInetAddresses())) {
+                    if (address instanceof Inet4Address && !address.isLoopbackAddress()) {
+                        return address.getHostAddress();
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        return "Not detected";
     }
 
     public static void main(String[] args) {
