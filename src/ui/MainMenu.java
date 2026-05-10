@@ -125,6 +125,8 @@ public class MainMenu extends JFrame {
             return;
         }
 
+        String lanIp = detectLanIp();
+
         try {
             ServerMain.startInBackground(port);
             Thread.sleep(250L);
@@ -138,11 +140,11 @@ public class MainMenu extends JFrame {
             return;
         }
 
-        hostField.setText(Constants.DEFAULT_HOST);
-        hostIpLabel.setText("Host LAN IP: " + detectLanIp());
+        hostField.setText(lanIp);
+        hostIpLabel.setText("Host LAN IP: " + lanIp);
         JOptionPane.showMessageDialog(
             this,
-            "Server started.\n\nOn the other computer, use this host address:\n" + detectLanIp() + "\nPort: " + port,
+            "Server started.\n\nOn the other computer, use this host address:\n" + lanIp + "\nPort: " + port,
             "Host Information",
             JOptionPane.INFORMATION_MESSAGE
         );
