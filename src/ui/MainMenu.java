@@ -144,6 +144,15 @@ public class MainMenu extends JFrame {
         String playerName = networkNameField.getText().trim().isEmpty() ? "Player" : networkNameField.getText().trim();
 
         GameState networkState = new GameState();
+        networkState.syncState(
+            networkState.getBoardSnapshot(),
+            'X',
+            GameState.Phase.WAITING_FOR_PLAYERS,
+            GameState.Outcome.NONE,
+            hostedLocally ? "Hosting server and connecting..." : "Connecting to server...",
+            playerName,
+            "Waiting for opponent"
+        );
         GameWindow window = new GameWindow(networkState);
         final GameClient[] clientHolder = new GameClient[1];
         final boolean[] resultDialogShown = new boolean[1];
