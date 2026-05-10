@@ -157,7 +157,12 @@ public class MainMenu extends JFrame {
             return;
         }
 
-        String host = hostField.getText().trim().isEmpty() ? Constants.DEFAULT_HOST : hostField.getText().trim();
+        String host;
+        if (hostedLocally) {
+            host = Constants.DEFAULT_HOST;
+        } else {
+            host = hostField.getText().trim().isEmpty() ? Constants.DEFAULT_HOST : hostField.getText().trim();
+        }
         String playerName = networkNameField.getText().trim().isEmpty() ? "Player" : networkNameField.getText().trim();
 
         GameState networkState = new GameState();
