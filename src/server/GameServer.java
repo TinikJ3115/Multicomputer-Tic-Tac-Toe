@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class GameServer {
+    // This class is the server-side source of truth for the multiplayer game.
     private final GameState gameState;
     private final Set<Character> rematchVotes;
     private ClientHandler playerX;
@@ -21,6 +22,7 @@ public class GameServer {
     }
 
     public void addPlayer(Socket socket, char symbol) throws IOException {
+        // Edit player assignment or connection setup here.
         ClientHandler handler = new ClientHandler(socket, symbol, this);
         Thread thread = new Thread(handler, "player-" + symbol);
         thread.start();
@@ -33,6 +35,7 @@ public class GameServer {
     }
 
     public synchronized void registerPlayer(ClientHandler handler, String playerName) {
+        // Edit what happens when a player first joins here.
         System.out.println("Player " + handler.getSymbol() + " is " + playerName);
 
         if (!bothPlayersConnected()) {
@@ -55,6 +58,7 @@ public class GameServer {
     }
 
     public synchronized void handleMove(ClientHandler handler, int row, int col) {
+        // Edit server-side move validation and turn enforcement here.
         if (gameState.getPhase() != GameState.Phase.IN_PROGRESS) {
             handler.sendMessage(Message.of(Protocol.INVALID, "The game is not accepting moves right now."));
             return;
@@ -78,6 +82,7 @@ public class GameServer {
     }
 
     public synchronized void handleRematchRequest(ClientHandler handler) {
+        // Edit rematch voting/start logic here.
         if (gameState.getPhase() != GameState.Phase.FINISHED) {
             handler.sendMessage(Message.of(Protocol.INVALID, "You can only request a rematch after the game ends."));
             return;
@@ -97,6 +102,7 @@ public class GameServer {
     }
 
     public synchronized void handleDisconnect(ClientHandler handler) {
+        // Edit disconnect behavior or disconnect messages here.
         String name = handler.getPlayerName() == null ? ("Player " + handler.getSymbol()) : handler.getPlayerName();
         ClientHandler other = otherPlayer(handler);
         if (other != null) {
@@ -105,10 +111,12 @@ public class GameServer {
     }
 
     private void broadcastState() {
+        // This is where the server pushes the latest board/game state to both clients.
         broadcast(Message.gameStateMessage(gameState));
     }
 
     private void broadcast(Message message) {
+        // Edit this if you ever need to change who receives server messages.
         if (playerX != null) {
             playerX.sendMessage(message);
         }

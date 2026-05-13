@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class ClientHandler implements Runnable {
+    // One ClientHandler is created per connected player socket.
     private final Socket socket;
     private final BufferedReader in;
     private final PrintWriter out;
@@ -18,6 +19,7 @@ public class ClientHandler implements Runnable {
     private String playerName;
 
     public ClientHandler(Socket socket, char symbol, GameServer server) throws IOException {
+        // Edit low-level socket stream setup here.
         this.socket = socket;
         this.symbol = symbol;
         this.server = server;
@@ -26,6 +28,7 @@ public class ClientHandler implements Runnable {
     }
 
     public void sendMessage(String msg) {
+        // This is the raw string send path from server to one client.
         out.println(msg);
     }
 
@@ -43,6 +46,7 @@ public class ClientHandler implements Runnable {
 
     @Override
     public void run() {
+        // Edit per-client startup messages here.
         sendMessage(Message.of(Protocol.WELCOME, String.valueOf(symbol)));
         sendMessage(Message.of(Protocol.INFO, "Connected to the Tic Tac Toe server."));
 
@@ -60,12 +64,15 @@ public class ClientHandler implements Runnable {
     }
 
     private void handleMessage(Message message) {
+        // Edit how server-side incoming client messages are routed here.
         switch (message.getType()) {
             case Protocol.HELLO:
+                // Edit player-name registration flow here.
                 playerName = message.getPartCount() > 0 ? message.getPart(0) : ("Player " + symbol);
                 server.registerPlayer(this, playerName);
                 break;
             case Protocol.MOVE:
+                // Edit client move parsing here.
                 if (message.getPartCount() < 2) {
                     sendMessage(Message.of(Protocol.ERROR, "Move message was missing coordinates."));
                     return;
@@ -75,9 +82,11 @@ public class ClientHandler implements Runnable {
                 server.handleMove(this, row, col);
                 break;
             case Protocol.REMATCH:
+                // Edit client rematch request routing here.
                 server.handleRematchRequest(this);
                 break;
             case Protocol.DISCONNECT:
+                // Edit explicit client disconnect behavior here.
                 close();
                 server.handleDisconnect(this);
                 break;
@@ -88,6 +97,7 @@ public class ClientHandler implements Runnable {
     }
 
     public synchronized void close() {
+        // Edit socket cleanup behavior here.
         try {
             socket.close();
         } catch (IOException ignored) {

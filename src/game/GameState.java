@@ -1,6 +1,7 @@
 package game;
 
 public class GameState {
+    // Edit these enums if you want to change the major stages or outcomes of a match.
     public enum Phase {
         WAITING_FOR_PLAYERS,
         IN_PROGRESS,
@@ -30,12 +31,14 @@ public class GameState {
     }
 
     public void configurePlayers(String playerXName, String playerOName) {
+        // Change default/fallback player naming behavior here.
         this.playerXName = normalizeName(playerXName, "Player X");
         this.playerOName = normalizeName(playerOName, "Player O");
         statusMessage = this.playerXName + " vs " + this.playerOName;
     }
 
     public void startGame() {
+        // Change the starting player here if the professor asks for O to go first.
         board.resetBoard();
         currentPlayer = 'X';
         phase = Phase.IN_PROGRESS;
@@ -52,6 +55,7 @@ public class GameState {
     }
 
     public boolean applyMove(int row, int col, char playerSymbol) {
+        // Edit turn validation and invalid-move rules in this method.
         if (phase != Phase.IN_PROGRESS) {
             statusMessage = "Start a game before making a move.";
             return false;
@@ -72,10 +76,12 @@ public class GameState {
     }
 
     public void resetForRematch() {
+        // Edit rematch behavior here if you want a different reset flow.
         startGame();
     }
 
     public void resetForNewSession() {
+        // Edit the initial waiting-screen status text here.
         board.resetBoard();
         currentPlayer = 'X';
         phase = Phase.WAITING_FOR_PLAYERS;
@@ -84,6 +90,7 @@ public class GameState {
     }
 
     private void updateAfterMove() {
+        // Edit what happens after every valid move here.
         char[][] snapshot = board.getBoard();
         if (GameLogic.checkWin(snapshot, currentPlayer)) {
             phase = Phase.FINISHED;
@@ -147,6 +154,7 @@ public class GameState {
     }
 
     public String getOutcomeMessage() {
+        // Edit the final result text shown to players here.
         switch (outcome) {
             case X_WINS:
                 return playerXName + " wins as X.";
@@ -168,6 +176,7 @@ public class GameState {
         String playerXName,
         String playerOName
     ) {
+        // This is the main place where server/network state overwrites the local copy.
         board.loadBoard(boardSnapshot);
         this.currentPlayer = currentPlayer;
         this.phase = phase;

@@ -37,6 +37,7 @@ public class MainMenu extends JFrame {
 
     public MainMenu() {
         super("Multicomputer Tic Tac Toe");
+        // Edit overall startup window size here if the menu ever feels cramped again.
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(12, 12));
         setMinimumSize(new Dimension(560, 430));
@@ -44,6 +45,7 @@ public class MainMenu extends JFrame {
         setLocationByPlatform(true);
 
         JLabel title = new JLabel("Start a Tic Tac Toe Match", SwingConstants.CENTER);
+        // Edit the main title text here.
         add(title, BorderLayout.NORTH);
 
         JPanel content = new JPanel();
@@ -63,6 +65,7 @@ public class MainMenu extends JFrame {
         localPanel.add(localForm, BorderLayout.CENTER);
 
         JButton startLocalButton = new JButton("Start Local Demo");
+        // Edit local-mode button text/behavior here.
         startLocalButton.addActionListener(e -> launchLocalGame());
         localPanel.add(startLocalButton, BorderLayout.SOUTH);
 
@@ -81,6 +84,7 @@ public class MainMenu extends JFrame {
         networkPanel.add(networkForm, BorderLayout.CENTER);
 
         hostIpLabel = new JLabel("Host LAN IP: " + detectLanIp(), SwingConstants.LEFT);
+        // This label shows the IP the other computer should use.
         hostIpLabel.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 4));
         networkPanel.add(hostIpLabel, BorderLayout.NORTH);
 
@@ -90,8 +94,10 @@ public class MainMenu extends JFrame {
         actionConstraints.fill = GridBagConstraints.HORIZONTAL;
         actionConstraints.weightx = 1.0;
         JButton hostButton = new JButton("Host and Join");
+        // Edit host-game button text/behavior here.
         hostButton.addActionListener(e -> hostAndJoinGame());
         JButton joinButton = new JButton("Join Server");
+        // Edit join-game button text/behavior here.
         joinButton.addActionListener(e -> joinNetworkGame(false));
         actionConstraints.gridx = 0;
         networkActions.add(hostButton, actionConstraints);
@@ -110,6 +116,7 @@ public class MainMenu extends JFrame {
     }
 
     private JPanel createFormPanel(String[] labels, JComponent[] fields) {
+        // This helper builds the labeled text-field rows used by the menu.
         JPanel form = new JPanel(new GridBagLayout());
         form.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
         GridBagConstraints constraints = new GridBagConstraints();
@@ -132,6 +139,7 @@ public class MainMenu extends JFrame {
     }
 
     private void launchLocalGame() {
+        // Edit local single-machine demo startup here.
         GameState state = new GameState();
         state.configurePlayers(playerXField.getText(), playerOField.getText());
         state.startGame();
@@ -162,6 +170,7 @@ public class MainMenu extends JFrame {
     }
 
     private void hostAndJoinGame() {
+        // Edit host startup flow here: port choice, host popup text, and displayed LAN IP.
         int port = parsePort();
         if (port < 0) {
             return;
@@ -194,6 +203,7 @@ public class MainMenu extends JFrame {
     }
 
     private void joinNetworkGame(boolean hostedLocally) {
+        // Edit join/connect behavior here, including which host/port gets used.
         int port = parsePort();
         if (port < 0) {
             return;
@@ -208,6 +218,7 @@ public class MainMenu extends JFrame {
         String playerName = networkNameField.getText().trim().isEmpty() ? "Player" : networkNameField.getText().trim();
 
         GameState networkState = new GameState();
+        // Edit the status text a player sees while the network game is connecting here.
         networkState.syncState(
             networkState.getBoardSnapshot(),
             'X',
@@ -224,6 +235,7 @@ public class MainMenu extends JFrame {
         GameClient client = new GameClient(host, port, playerName, new GameClient.Listener() {
             @Override
             public void onAssignedSymbol(char symbol) {
+                // Edit the network game window title format here.
                 SwingUtilities.invokeLater(() ->
                     window.setTitle("Multicomputer Tic Tac Toe - Player " + symbol)
                 );
@@ -254,6 +266,7 @@ public class MainMenu extends JFrame {
 
             @Override
             public void onInvalidMove(String message) {
+                // Edit how invalid move errors are shown here.
                 SwingUtilities.invokeLater(() -> ResultPopup.showError(window, message));
             }
 
@@ -274,6 +287,7 @@ public class MainMenu extends JFrame {
         clientHolder[0] = client;
 
         window.setMoveHandler((row, col) -> {
+            // This is where a board click becomes a network move request.
             client.sendMove(row, col);
             return true;
         });
@@ -305,6 +319,7 @@ public class MainMenu extends JFrame {
     }
 
     private void updateClientStatus(GameState state, String message, GameWindow window) {
+        // Edit temporary status-message behavior for connecting/waiting screens here.
         state.syncState(
             state.getBoardSnapshot(),
             state.getCurrentPlayer(),
@@ -318,6 +333,7 @@ public class MainMenu extends JFrame {
     }
 
     private int parsePort() {
+        // Edit port validation/error text here.
         try {
             return Integer.parseInt(portField.getText().trim());
         } catch (NumberFormatException e) {
@@ -327,6 +343,7 @@ public class MainMenu extends JFrame {
     }
 
     private String detectLanIp() {
+        // Edit LAN IP detection here if you need a different network-interface rule.
         try {
             for (NetworkInterface networkInterface : Collections.list(NetworkInterface.getNetworkInterfaces())) {
                 if (!networkInterface.isUp() || networkInterface.isLoopback() || networkInterface.isVirtual()) {

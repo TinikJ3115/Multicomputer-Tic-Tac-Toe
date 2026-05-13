@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Message {
+    // This class defines how socket messages are packed into strings and unpacked again.
     private static final String DELIMITER = "|";
     private static final String DELIMITER_REGEX = "\\|";
 
@@ -24,6 +25,7 @@ public class Message {
     }
 
     public static Message parse(String raw) {
+        // Edit parsing rules here if you change the wire/message format.
         String[] tokens = raw.split(DELIMITER_REGEX, -1);
         String type = tokens[0];
         List<String> parts = new ArrayList<>();
@@ -34,6 +36,7 @@ public class Message {
     }
 
     public String serialize() {
+        // Edit serialization rules here if you change the wire/message format.
         StringBuilder builder = new StringBuilder(type);
         for (String part : parts) {
             builder.append(DELIMITER).append(escape(part));
@@ -54,6 +57,7 @@ public class Message {
     }
 
     public static String boardToString(char[][] board) {
+        // Edit this if you want a different way to encode the 3x3 board for sockets.
         StringBuilder builder = new StringBuilder(Board.SIZE * Board.SIZE);
         for (int row = 0; row < Board.SIZE; row++) {
             for (int col = 0; col < Board.SIZE; col++) {
@@ -65,6 +69,7 @@ public class Message {
     }
 
     public static char[][] stringToBoard(String encodedBoard) {
+        // Edit this if you change how boards are decoded from socket messages.
         char[][] board = new char[Board.SIZE][Board.SIZE];
         for (int i = 0; i < encodedBoard.length() && i < Board.SIZE * Board.SIZE; i++) {
             char value = encodedBoard.charAt(i);
@@ -74,6 +79,7 @@ public class Message {
     }
 
     public static Message gameStateMessage(GameState gameState) {
+        // This defines the full STATE message sent from server to both clients.
         return Message.of(
             Protocol.STATE,
             gameState.getPhase().name(),
@@ -87,6 +93,7 @@ public class Message {
     }
 
     private static String escape(String value) {
+        // Edit escaping here if special characters ever break the protocol format.
         return value.replace(DELIMITER, "\\p");
     }
 }

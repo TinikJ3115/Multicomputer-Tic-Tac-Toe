@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class GameClient {
+    // This class manages the client-side socket connection to the host/server.
     public interface Listener {
         void onAssignedSymbol(char symbol);
         void onStateUpdated(GameState state);
@@ -45,6 +46,7 @@ public class GameClient {
     }
 
     public void connect() throws IOException {
+        // Edit how the client opens the socket connection here.
         socket = new Socket(host, port);
         out = new PrintWriter(socket.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -56,14 +58,17 @@ public class GameClient {
     }
 
     public void sendMove(int row, int col) {
+        // Edit the outgoing move message format here if protocol requirements change.
         send(Message.of(Protocol.MOVE, String.valueOf(row), String.valueOf(col)));
     }
 
     public void requestRematch() {
+        // Edit outgoing rematch requests here.
         send(Message.of(Protocol.REMATCH));
     }
 
     public void disconnect() {
+        // Edit disconnect behavior here.
         send(Message.of(Protocol.DISCONNECT));
         try {
             if (socket != null) {
@@ -82,12 +87,14 @@ public class GameClient {
     }
 
     private void send(Message message) {
+        // This is the single path for sending messages from the client to the server.
         if (out != null) {
             out.println(message.serialize());
         }
     }
 
     private void listenForMessages() {
+        // This loop waits for server updates and feeds them back into the UI/game state.
         try {
             String line;
             while ((line = in.readLine()) != null) {
@@ -99,6 +106,7 @@ public class GameClient {
     }
 
     private void handleMessage(Message message) {
+        // Edit how incoming server messages are interpreted here.
         switch (message.getType()) {
             case Protocol.WELCOME:
                 symbol = message.getPart(0).charAt(0);

@@ -14,6 +14,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 public class GameWindow extends JFrame {
+    // This is the main gameplay window shown after the menu.
     public interface MoveHandler {
         boolean onMoveRequested(int row, int col);
     }
@@ -39,6 +40,7 @@ public class GameWindow extends JFrame {
         this.restartButton = new JButton("Restart");
         this.menuButton = new JButton("Main Menu");
 
+        // Edit gameplay window sizing/layout here.
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(12, 12));
         setMinimumSize(new Dimension(420, 500));
@@ -53,6 +55,7 @@ public class GameWindow extends JFrame {
         actionsPanel.add(menuButton);
         add(actionsPanel, BorderLayout.SOUTH);
 
+        // Edit what happens when the player clicks a board square here.
         boardPanel.setMoveListener((row, col) -> {
             if (moveHandler == null) {
                 return;
@@ -66,6 +69,7 @@ public class GameWindow extends JFrame {
         });
 
         restartButton.addActionListener(e -> {
+            // Edit restart-button behavior here.
             if (flowHandler != null) {
                 flowHandler.onRestartRequested();
             }
@@ -73,6 +77,7 @@ public class GameWindow extends JFrame {
         });
 
         menuButton.addActionListener(e -> {
+            // Edit main-menu button behavior here.
             if (flowHandler != null) {
                 flowHandler.onBackToMenuRequested();
             }
@@ -90,6 +95,7 @@ public class GameWindow extends JFrame {
     }
 
     public void refresh() {
+        // This is the main place where the screen redraws from the latest GameState.
         statusLabel.setText(gameState.getStatusMessage());
         boardPanel.renderBoard(gameState.getBoardSnapshot());
         boardPanel.setBoardEnabled(gameState.getPhase() == GameState.Phase.IN_PROGRESS);
@@ -104,6 +110,7 @@ public class GameWindow extends JFrame {
     }
 
     public void showResultIfFinished() {
+        // Edit end-of-game popup flow here.
         if (gameState.getPhase() != GameState.Phase.FINISHED) {
             return;
         }

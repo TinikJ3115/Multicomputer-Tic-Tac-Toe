@@ -1,6 +1,7 @@
 package shared;
 
 public final class Protocol {
+    // Edit this file if the professor asks you to rename, add, or remove socket message types.
     public static final String HELLO = "HELLO";
     public static final String WELCOME = "WELCOME";
     public static final String WAITING = "WAITING";
