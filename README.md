@@ -60,7 +60,7 @@ java -cp out server.ServerMain
 2. Enter your name, server host, and port.
 3. Click `Join Server`.
 
-## Assignment Features Covered
+## Features
 
 - socket-based communication between players
 - multiplayer gameplay across two computers
