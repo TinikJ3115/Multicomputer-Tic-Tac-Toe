@@ -17,6 +17,7 @@ public class ClientHandler implements Runnable {
     private final char symbol;
     private final GameServer server;
     private String playerName;
+    private boolean disconnectHandled;
 
     public ClientHandler(Socket socket, char symbol, GameServer server) throws IOException {
         // Edit low-level socket stream setup here.
@@ -59,7 +60,7 @@ public class ClientHandler implements Runnable {
             System.out.println("Player " + symbol + " disconnected.");
         } finally {
             close();
-            server.handleDisconnect(this);
+            notifyDisconnectOnce();
         }
     }
 
@@ -88,7 +89,7 @@ public class ClientHandler implements Runnable {
             case Protocol.DISCONNECT:
                 // Edit explicit client disconnect behavior here.
                 close();
-                server.handleDisconnect(this);
+                notifyDisconnectOnce();
                 break;
             default:
                 sendMessage(Message.of(Protocol.ERROR, "Unknown message type: " + message.getType()));
@@ -102,5 +103,13 @@ public class ClientHandler implements Runnable {
             socket.close();
         } catch (IOException ignored) {
         }
+    }
+
+    private synchronized void notifyDisconnectOnce() {
+        if (disconnectHandled) {
+            return;
+        }
+        disconnectHandled = true;
+        server.handleDisconnect(this);
     }
 }

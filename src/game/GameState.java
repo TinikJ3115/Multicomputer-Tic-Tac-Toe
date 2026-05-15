@@ -38,7 +38,7 @@ public class GameState {
     }
 
     public void startGame() {
-        // Change the starting player here if the professor asks for O to go first.
+        // Change the starting player here 
         board.resetBoard();
         currentPlayer = 'X';
         phase = Phase.IN_PROGRESS;

@@ -10,6 +10,8 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -26,6 +28,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 
 public class MainMenu extends JFrame {
     private final JTextField playerXField;
@@ -273,15 +276,19 @@ public class MainMenu extends JFrame {
             @Override
             public void onDisconnected(String message) {
                 SwingUtilities.invokeLater(() -> {
-                    ResultPopup.showError(window, message);
-                    window.dispose();
-                    setVisible(true);
+                    endNetworkGame(window, message);
                 });
             }
 
             @Override
             public void onError(String message) {
-                SwingUtilities.invokeLater(() -> ResultPopup.showError(window, message));
+                SwingUtilities.invokeLater(() -> {
+                    if (message.toLowerCase().contains("disconnected") || message.toLowerCase().contains("game has ended")) {
+                        endNetworkGame(window, message);
+                    } else {
+                        ResultPopup.showError(window, message);
+                    }
+                });
             }
         }, networkState);
         clientHolder[0] = client;
@@ -299,6 +306,15 @@ public class MainMenu extends JFrame {
 
             @Override
             public void onBackToMenuRequested() {
+                clientHolder[0].disconnect();
+                window.dispose();
+                setVisible(true);
+            }
+        });
+        window.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        window.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
                 clientHolder[0].disconnect();
                 window.dispose();
                 setVisible(true);
@@ -330,6 +346,12 @@ public class MainMenu extends JFrame {
             state.getPlayerOName()
         );
         window.refresh();
+    }
+
+    private void endNetworkGame(GameWindow window, String message) {
+        ResultPopup.showError(window, message);
+        window.dispose();
+        setVisible(true);
     }
 
     private int parsePort() {

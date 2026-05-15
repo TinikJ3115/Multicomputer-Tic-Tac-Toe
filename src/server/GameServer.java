@@ -105,6 +105,14 @@ public class GameServer {
         // Edit disconnect behavior or disconnect messages here.
         String name = handler.getPlayerName() == null ? ("Player " + handler.getSymbol()) : handler.getPlayerName();
         ClientHandler other = otherPlayer(handler);
+        rematchVotes.clear();
+
+        if (handler == playerX) {
+            playerX = null;
+        } else if (handler == playerO) {
+            playerO = null;
+        }
+
         if (other != null) {
             other.sendMessage(Message.of(Protocol.ERROR, name + " disconnected. The game has ended."));
         }
