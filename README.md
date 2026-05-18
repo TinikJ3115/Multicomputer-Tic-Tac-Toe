@@ -1,5 +1,4 @@
 # Multicomputer-Tic-Tac-Toe
-Operating System 439 Project - Multicomputer Tic Tac Toe
 
 This project is a socket-based multiplayer Tic Tac Toe game written in Java. It supports:
 
